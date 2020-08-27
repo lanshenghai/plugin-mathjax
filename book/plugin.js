@@ -1,6 +1,6 @@
 require(["gitbook"], function(gitbook) {
     MathJax.Hub.Config({
-        tex2jax: {}
+        tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
     });
 
 

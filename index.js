@@ -64,22 +64,32 @@ function convertTexToSvg(tex, options) {
 }
 
 /**
+    Process a math inline
+
+    @param {Block} blk
+    @return {Promise<Block>}
+*/
+function processInline(blk) {
+    return processTex(this, blk.body, true);
+}
+
+/**
     Process a math block
 
     @param {Block} blk
     @return {Promise<Block>}
 */
 function processBlock(blk) {
-    var book = this;
-    var tex = blk.body;
-    var isInline = !(tex[0] == "\n");
+    return processTex(this, blk.body, false);
+}
 
+function processTex(book, tex, isInline) {
     // For website return as script
     var config = book.config.get('pluginsConfig.mathjax', {});
 
     if ((book.output.name == "website" || book.output.name == "json")
         && !config.forceSVG) {
-        return '<script type="math/tex; '+(isInline? "": "mode=display")+'">'+blk.body+'</script>';
+        return '<script type="math/tex; '+(isInline? "": "mode=display")+'">'+tex+'</script>';
     }
 
     // Check if not already cached
@@ -132,13 +142,21 @@ function getWebsiteAssets() {
 module.exports = {
     website: getWebsiteAssets,
     blocks: {
-        math: {
+        mathblock: {
             shortcuts: {
                 parsers: ["markdown", "asciidoc"],
                 start: "$$",
                 end: "$$"
             },
             process: processBlock
+        },
+        math: {
+            shortcuts: {
+                parsers: ["markdown", "asciidoc"],
+                start: "$",
+                end: "$"
+            },
+            process: processInline
         }
     }
 };
