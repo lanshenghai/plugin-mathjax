@@ -2,7 +2,7 @@
     "name": "gitbook-plugin-mathjax-single-dollar",
     "description": "MathJAX integration into GitBook to display math and latex equations",
     "main": "index.js",
-    "version": "1.1.7",
+    "version": "1.1.8",
     "engines": {
         "gitbook": ">=3.0.0"
     },
@@ -12,14 +12,14 @@
         "q": "^1.1.2",
         "crc": "^3.2.1"
     },
-    "homepage": "https://github.com/GitbookIO/plugin-mathjax",
+    "homepage": "https://github.com/lanshenghai/plugin-mathjax",
     "repository": {
         "type": "git",
-        "url": "https://github.com/GitbookIO/plugin-mathjax.git"
+        "url": "https://github.com/lanshenghai/plugin-mathjax.git"
     },
     "license": "Apache-2.0",
     "bugs": {
-        "url": "https://github.com/GitbookIO/plugin-mathjax/issues"
+        "url": "https://github.com/lanshenghai/plugin-mathjax/issues"
     },
     "keywords": ["math", "latex"],
     "gitbook": {
