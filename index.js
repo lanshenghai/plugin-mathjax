@@ -63,26 +63,6 @@ function convertTexToSvg(tex, options) {
     return d.promise;
 }
 
-/**
-    Process a math inline
-
-    @param {Block} blk
-    @return {Promise<Block>}
-*/
-function processInline(blk) {
-    return processTex(this, blk.body, true);
-}
-
-/**
-    Process a math block
-
-    @param {Block} blk
-    @return {Promise<Block>}
-*/
-function processBlock(blk) {
-    return processTex(this, blk.body, false);
-}
-
 function processTex(book, tex, isInline) {
     // For website return as script
     var config = book.config.get('pluginsConfig.mathjax', {});
@@ -122,18 +102,53 @@ function processTex(book, tex, isInline) {
     };
 }
 
+var blockRegex = /(?<!\\)\$\$((.*[\r\n]*)+?)\$\$/m;
+var inlineRegex = /(?<!\\)\$(.+?)\$/;
+var quotaRegex = /(?<!\\)`.+?`/m;
+
+function processRegReplace(book, content, regex, isInline) {
+    var match;
+    while (match = regex.exec(content)) {
+        var rawBlock = match[0];
+        var texBlock = match[1];
+        var start = match.index;
+        var end = match.index + rawBlock.length;
+        var texContent = processTex(book, texBlock, isInline);
+        content = content.substring(0, start) + '<span>' + texContent + '</span>' + content.substring(end);
+    }
+    return content;
+}
+
+function processMathTexList(page) {
+    var new_content = "";
+    var start_pos = 0;
+
+    // skip quota
+    while (match = quotaRegex.exec(page.content.substring(start_pos))) {
+      var temp = page.content.substring(start_pos, match.index);
+      temp = processRegReplace(this, temp, blockRegex, false);
+      new_content += processRegReplace(this, temp, inlineRegex, true);
+      new_content += match[0];
+      start_pos += match.index + match[0].length;
+    }
+    // for last part or no match
+    var temp = page.content.substring(start_pos);
+    temp = processRegReplace(this, temp, blockRegex, false);
+    new_content += processRegReplace(this, temp, inlineRegex, true);
+
+    page.content = new_content;
+    return page;
+}
 /**
     Return assets for website
 
     @return {Object}
 */
 function getWebsiteAssets() {
-    var version = this.config.get('pluginsConfig.mathjax.version', 'latest');
-
     return {
         assets: "./book",
         js: [
-            'https://cdnjs.cloudflare.com/ajax/libs/mathjax/' + version + '/MathJax.js?config=TeX-AMS-MML_HTMLorMML',
+            'MathJax.js?config=TeX-AMS-MML_HTMLorMML',
             'plugin.js'
         ]
     };
@@ -141,22 +156,7 @@ function getWebsiteAssets() {
 
 module.exports = {
     website: getWebsiteAssets,
-    blocks: {
-        mathblock: {
-            shortcuts: {
-                parsers: ["markdown", "asciidoc"],
-                start: "$$",
-                end: "$$"
-            },
-            process: processBlock
-        },
-        math: {
-            shortcuts: {
-                parsers: ["markdown", "asciidoc"],
-                start: "$",
-                end: "$"
-            },
-            process: processInline
-        }
+    hooks: {
+        'page:before': processMathTexList
     }
 };

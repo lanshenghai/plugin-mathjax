@@ -3,8 +3,9 @@ require(["gitbook"], function(gitbook) {
     //     tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
     // });
 
-    gitbook.events.bind("page.change", function() {
-        MathJax.Hub.Typeset()
-    });
+
+    // gitbook.events.bind("page.change", function() {
+    //     MathJax.Hub.Typeset()
+    // });
 });
 
